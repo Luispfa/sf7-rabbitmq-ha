@@ -18,19 +18,10 @@ framework:
           queues:
             messages: ~
 
-      gender_count:
-        dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
-        options:
-          exchange:
-            name: gender_count
-            type: direct
-          queues:
-            gender_count: ~
-
     routing:
       # Route your messages to the transports
       'App\Domain\Message\Message': async
-      'App\Domain\Message\GenderCountMessage': gender_count
+      'App\Domain\Message\GenderCountMessage': async
 # when@test:
 #    framework:
 #        messenger:
