@@ -1,0 +1,45 @@
+services:
+    php:
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+            args:
+                TIMEZONE: ${TIMEZONE}
+        container_name: sf7_php_ha
+        volumes:
+            - .:/var/www/rabbit-mq/
+        networks:
+            - symfony_network
+    nginx:
+        build:
+            context: .
+            dockerfile: docker/nginx/Dockerfile
+        container_name: sf7_nginx_ha
+        volumes:
+            - .:/var/www/rabbit-mq/
+        ports:
+            - 80:80
+        networks:
+            - symfony_network
+    
+    rabbitmq:
+        image: rabbitmq:latest
+        container_name: sf7_rabbitmq_ha
+        restart: unless-stopped
+        environment:
+            - RABBITMQ_DEFAULT_USER=guest
+            - RABBITMQ_DEFAULT_PASS=guest
+        ports:
+            - "5672:5672"
+            - "15672:15672"  # Para acceder a la UI de RabbitMQ
+        volumes:
+            - rabbitmq_data:/var/lib/rabbitmq
+            - ./docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+        networks:
+            - symfony_network
+
+networks:
+    symfony_network:
+
+volumes:
+  rabbitmq_data:
