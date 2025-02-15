@@ -57,16 +57,10 @@ php bin/console messenger:consume async --daemon
 
 #### 📩 Enviar Mensaje a la Cola `async`
 
-Con `curl`:
-
-```bash
-curl -X POST http://localhost:8000/send-message -H "Content-Type: application/json" -d '{"message": "Hola RabbitMQ! Luis"}'
-```
-
 Con Postman:
 
 - **Método:** `POST`
-- **URL:** `http://localhost:8000/send-message`
+- **URL:** `http://dev.rabbit-mq.com/send-message`
 - **Headers:** `Content-Type: application/json`
 - **Body (raw JSON):**
   ```json
@@ -77,16 +71,10 @@ Con Postman:
 
 #### 👤 Registrar un Usuario
 
-Con `curl`:
-
-```bash
-curl -X POST http://localhost:8000/register-user -H "Content-Type: application/json" -d '{"name": "Juan", "email": "juan@example.com", "gender": "male"}'
-```
-
 Con Postman:
 
 - **Método:** `POST`
-- **URL:** `http://localhost:8000/register-user`
+- **URL:** `http://dev.rabbit-mq.com/register-user`
 - **Headers:** `Content-Type: application/json`
 - **Body (raw JSON):**
   ```json
@@ -99,16 +87,10 @@ Con Postman:
 
 #### 📊 Contar Usuarios por Género
 
-Con `curl`:
-
-```bash
-curl -X GET http://localhost:8000/gender-count
-```
-
 Con Postman:
 
 - **Método:** `GET`
-- **URL:** `http://localhost:8000/gender-count`
+- **URL:** `http://dev.rabbit-mq.com/gender-count`
 
 ### 🐇 Acceso a RabbitMQ
 
