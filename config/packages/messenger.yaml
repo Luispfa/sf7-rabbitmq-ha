@@ -20,8 +20,7 @@ framework:
 
     routing:
       # Route your messages to the transports
-      'App\Domain\Message\Message': async
-      'App\Domain\Message\GenderCountMessage': async
+      'App\Message\Domain\Message\Message': async
 # when@test:
 #    framework:
 #        messenger:
