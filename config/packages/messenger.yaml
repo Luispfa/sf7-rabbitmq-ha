@@ -21,6 +21,7 @@ framework:
     routing:
       # Route your messages to the transports
       'App\Message\Domain\Message\Message': async
+      'App\User\Domain\Event\UserRegisteredEvent': async
 # when@test:
 #    framework:
 #        messenger:

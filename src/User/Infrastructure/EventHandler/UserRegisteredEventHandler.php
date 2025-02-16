@@ -8,7 +8,7 @@ use App\User\Domain\Event\UserRegisteredEvent;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class GenderCountEventHandler
+class UserRegisteredEventHandler
 {
     // Simulamos un contador en un archivo para persistencia temporal.
     // En una aplicación real, esto se haría en una base de datos o sistema de cache.

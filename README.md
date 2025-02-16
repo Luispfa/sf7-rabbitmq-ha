@@ -1,6 +1,15 @@
 # Proyecto Symfony con RabbitMQ en Arquitectura Hexagonal
 
-Este proyecto implementa un sistema de mensajería con RabbitMQ en un entorno Symfony, siguiendo la Arquitectura Hexagonal.
+Este proyecto implementa un **sistema de mensajería** con **RabbitMQ** en un entorno **Symfony**, siguiendo la **Arquitectura Hexagonal** y utilizando **eventos de dominio** para **desacoplar** la **lógica de negocio** de la **infraestructura**. Los **eventos de dominio** se disparan en el núcleo de la aplicación cuando ocurren cambios significativos y se procesan mediante **handlers** específicos, lo que permite actualizar, por ejemplo, contadores u otros procesos de forma **asíncrona**.
+
+Además, el módulo **Message** envía mensajes de forma directa, sin utilizar eventos de dominio, lo que permite un flujo de comunicación sencillo y sin lógica adicional de negocio.
+
+En contraste, el módulo **User** sí utiliza **eventos de dominio** para reaccionar a cambios importantes en el sistema.
+
+Por ejemplo:
+
+- **UserRegisteredEvent**: Este evento se dispara cuando se registra un nuevo usuario. Permite ejecutar acciones adicionales, como el envío de notificaciones o la realización de otras tareas relacionadas con la integración del usuario en el sistema.
+- **UserRegisteredEventHandler**: Este evento se utiliza para actualizar el contador de usuarios por género de manera asíncrona. Con ello, se mantiene un seguimiento del número de usuarios de cada género sin acoplar directamente la lógica de actualización al flujo principal de negocio.
 
 ## 🚀 Pasos para la Instalación
 
@@ -44,7 +53,7 @@ curl -u guest:guest http://sf7_rabbitmq_ha:15672/api/overview
 ### 4⃣ Ejecutar el Consumidor de RabbitMQ
 
 ```bash
-php bin/console messenger:consume async
+php bin/console messenger:consume async -vv
 ```
 
 Ejecutar el Consumidor de RabbitMQ en segundo plano:
@@ -65,7 +74,7 @@ Con Postman:
 - **Body (raw JSON):**
   ```json
   {
-    "message": "Hola RabbitMQ! Luis"
+    "message": "Hola RabbitMQ!"
   }
   ```
 
@@ -80,8 +89,8 @@ Con Postman:
   ```json
   {
     "name": "Juan",
-    "email": "juan@example.com",
-    "gender": "male"
+    "lastname": "Flores",
+    "gender": "Male"
   }
   ```
 
