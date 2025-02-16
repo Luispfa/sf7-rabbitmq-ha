@@ -15,9 +15,9 @@ class RegisterUserService
         private DomainEventBus $eventBus
     ) {}
 
-    public function __invoke(string $name, string $lastname, string $gender): array
+    public function __invoke(string $name, string $lastname, string $gender, string $email): array
     {
-        $user = User::create($name, $lastname, $gender);
+        $user = User::create($name, $lastname, $gender, $email);
         $this->userRepository->save($user);
 
         // Dispatch events from the application, not from the domain

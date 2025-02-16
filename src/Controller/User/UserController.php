@@ -23,11 +23,11 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['name'], $data['lastname'], $data['gender'])) {
+        if (!isset($data['name'], $data['lastname'], $data['gender'], $data['email'])) {
             return new JsonResponse(['error' => 'Invalid input'], 400);
         }
 
-        $user = ($this->registerUser)($data['name'], $data['lastname'], $data['gender']);
+        $user = ($this->registerUser)($data['name'], $data['lastname'], $data['gender'], $data['email']);
 
         return new JsonResponse($user);
     }

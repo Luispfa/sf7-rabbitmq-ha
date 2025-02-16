@@ -14,6 +14,11 @@ class UserRegisteredEventHandler
     // En una aplicación real, esto se haría en una base de datos o sistema de cache.
     public function __invoke(UserRegisteredEvent $event): void
     {
+        echo "✅ Processing UserRegisteredEvent for user {$event->getUserId()}...\n";
+        // Simulating an error
+        // throw new \Exception("❌ Simulated error: Failed to process UserRegisteredEvent.");
+
+
         $gender = $event->getGender();
         $file = $_ENV['GENDER_COUNT_JSON_FILE'];
 
@@ -25,5 +30,7 @@ class UserRegisteredEventHandler
 
         $data[$gender] = ($data[$gender] ?? 0) + 1;
         file_put_contents($file, json_encode($data));
+
+        echo "✅ Successfully processed UserRegisteredEvent for user {$event->getUserId()}.\n";
     }
 }

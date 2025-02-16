@@ -17,11 +17,33 @@ framework:
             type: direct
           queues:
             messages: ~
+      user_registered:
+        dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
+        options:
+          exchange:
+            name: user_events
+            type: direct
+          queues:
+            user_registered_queue: ~
+
+      user_email_sent:
+        dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
+        options:
+          exchange:
+            name: user_events
+            type: direct
+          queues:
+            user_email_sent_queue:
+              arguments:
+                x-dead-letter-exchange: user_events
+                x-dead-letter-routing-key: user_registered_queue
 
     routing:
       # Route your messages to the transports
       'App\Message\Domain\Message\Message': async
-      'App\User\Domain\Event\UserRegisteredEvent': async
+      # 'App\User\Domain\Event\UserRegisteredEvent': async
+      'App\User\Domain\Event\UserRegisteredEvent': user_registered
+      'App\User\Domain\Event\UserEmailSentEvent': user_email_sent
 # when@test:
 #    framework:
 #        messenger:

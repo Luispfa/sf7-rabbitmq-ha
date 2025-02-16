@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\User\Domain;
 
 use App\User\Domain\Event\UserRegisteredEvent;
+use App\User\Domain\Event\UserEmailSentEvent;
 use Ramsey\Uuid\Uuid as RamseyUuid;
 
 class User
@@ -16,18 +17,22 @@ class User
         private string $name,
         private string $lastname,
         private string $gender,
+        private string $email,
     ) {}
 
     public static function create(
         string $name,
         string $lastname,
-        string $gender
+        string $gender,
+        string $email,
     ): static {
         $uuid = RamseyUuid::uuid4()->toString();
-        $user = new static($uuid, $name, $lastname, $gender);
+        $user = new static($uuid, $name, $lastname, $gender, $email);
 
         // Accumulate event instead of dispatching it here
         $user->recordDomainEvent(UserRegisteredEvent::fromUser($user));
+        $user->recordDomainEvent(UserEmailSentEvent::fromUser($user));
+
 
         return $user;
     }
@@ -52,6 +57,11 @@ class User
         return $this->gender;
     }
 
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
     public function toArray(): array
     {
         return [
@@ -59,6 +69,7 @@ class User
             'name' => $this->name,
             'lastname' => $this->lastname,
             'gender' => $this->gender,
+            'email' => $this->email,
         ];
     }
 
