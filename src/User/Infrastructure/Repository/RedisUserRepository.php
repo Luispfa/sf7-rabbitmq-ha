@@ -10,17 +10,10 @@ use Predis\Client;
 
 class RedisUserRepository implements UserRepository
 {
-    private Client $redis;
     private const REDIS_KEY = 'users';
+    private const GENDER_COUNT_KEY = 'gender_count';
 
-    public function __construct()
-    {
-        $this->redis = new Client([
-            'scheme' => 'tcp',
-            'host' => 'sf7_redis_ha',
-            'port' => 6379,
-        ]);
-    }
+    public function __construct(private Client $redis) {}
 
     public function save(User $user): void
     {
@@ -40,5 +33,16 @@ class RedisUserRepository implements UserRepository
     {
         $data = $this->redis->get(self::REDIS_KEY);
         return $data ? json_decode($data, true) : [];
+    }
+
+    public function getGenderCount(): array
+    {
+        $data = $this->redis->get(self::GENDER_COUNT_KEY);
+        return $data ? json_decode($data, true) : [];
+    }
+
+    public function saveGenderCount(array $genderCount): void
+    {
+        $this->redis->set(self::GENDER_COUNT_KEY, json_encode($genderCount));
     }
 }

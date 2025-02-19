@@ -24,3 +24,7 @@ services:
   # Enlazamos la interfaz con la implementación correcta usando "bind"
   App\User\Domain\UserRepository: '@App\User\Infrastructure\Repository\RedisUserRepository'
   # App\User\Domain\UserRepository: '@App\User\Infrastructure\Repository\InMemoryUserRepository'
+
+  Predis\Client:
+    arguments:
+      - { scheme: 'tcp', host: 'sf7_redis_ha', port: 6379 }  

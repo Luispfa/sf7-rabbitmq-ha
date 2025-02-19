@@ -30,13 +30,14 @@ framework:
         dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
         options:
           exchange:
-            name: user_events
+            name: email_events
             type: direct
           queues:
             user_email_sent_queue:
-              arguments:
-                x-dead-letter-exchange: user_events
-                x-dead-letter-routing-key: user_registered_queue
+              ~
+              # arguments:
+              #   x-dead-letter-exchange: user_events # Si falla, lo reenvía a user_events
+              #   x-dead-letter-routing-key: user_registered_queue # Espera que user_registered sea consumido antes
 
     routing:
       # Route your messages to the transports
