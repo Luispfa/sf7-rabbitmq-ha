@@ -6,19 +6,21 @@
 parameters:
 
 services:
-    # default configuration for services in *this* file
-    _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+  _defaults:
+    autowire: true
+    autoconfigure: true
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
-    App\:
-        resource: '../src/'
-        exclude:
-            - '../src/DependencyInjection/'
-            - '../src/Entity/'
-            - '../src/Kernel.php'
+  App\:
+    resource: "../src/"
+    exclude:
+      - "../src/DependencyInjection/"
+      - "../src/Entity/"
+      - "../src/Kernel.php"
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+  # Definimos el servicio de manera explícita
+  #   App\User\Infrastructure\Repository\RedisUserRepository:
+  #     arguments: []
+
+  # Enlazamos la interfaz con la implementación correcta usando "bind"
+  App\User\Domain\UserRepository: '@App\User\Infrastructure\Repository\RedisUserRepository'
+  # App\User\Domain\UserRepository: '@App\User\Infrastructure\Repository\InMemoryUserRepository'
