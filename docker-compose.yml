@@ -52,6 +52,19 @@ services:
         networks:
             - symfony_network
 
+    redis-commander:
+        image: ghcr.io/joeferner/redis-commander:latest
+        container_name: sf7_redis_commander
+        restart: unless-stopped
+        environment:
+            - REDIS_HOSTS=local:dev.rabbit-mq.com
+        ports:
+            - "8081:8081"
+        networks:
+            - symfony_network
+        depends_on:
+            - redis
+
 networks:
     symfony_network:
 

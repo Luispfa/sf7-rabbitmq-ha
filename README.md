@@ -9,44 +9,44 @@ Este repositorio es bilingüe. A continuación encontrarás la versión en ingl�
 <img src="youtube-banner.png" alt="@fitCoding - RabbitMQ - Domain Event" style="max-width: 30%; float: left; margin-right: 20px;">
 
   <div style="max-width: 70%; text-align: left;">
-    <strong style="font-size: 30px; font-weight: bold;">Proyecto "RabbitMQ - Domain Event"</strong>
+    <strong style="font-size: 30px; font-weight: bold;">Proyecto "RabbitMQ - Redis - Domain Event"</strong>
     <br>
-    <span style="font-size: 24px;">Software Development with Symfony 7, PHP 8.3, RabbitMQ latest, and Hexagonal Architecture</span>
+    <span style="font-size: 24px;">Software Development with Symfony 7, PHP 8.3, RabbitMQ latest, Redis latest and Hexagonal Architecture</span>
     <br>
-    <span style="font-size: 24px;">Desarrollo de Software con Symfony 7, PHP 8.3, RabbitMQ latest y Arquitectura Hexagonal</span>
+    <span style="font-size: 24px;">Desarrollo de Software con Symfony 7, PHP 8.3, RabbitMQ latest, Redis latest y Arquitectura Hexagonal</span>
   </div>
 </div>
 <p></p>
 
 ## English
 
-# Symfony Project with RabbitMQ in Hexagonal Architecture
+# Symfony Project with RabbitMQ and Redis in Hexagonal Architecture
 
-This project implements a **messaging system** with **RabbitMQ** in a **Symfony** environment, following **Hexagonal Architecture** and using **domain events** to **decouple** the **business logic** from the **infrastructure**. Domain events are triggered at the core of the application when significant changes occur and are processed by specific **handlers**, allowing, for example, counters or other processes to be updated **asynchronously**.
+This project implements a **messaging system** with **RabbitMQ** and **Redis** in a **Symfony** environment, following the **Hexagonal Architecture** and using **domain events** to **decouple** **business logic** from **infrastructure**. Domain events are triggered within the application core when significant changes occur and are processed by **specific handlers**, allowing, for example, counters or other processes to be updated **asynchronously**.
 
-### Module Message
+### Message Module
 
 Additionally, the **Message** module sends messages directly without domain events.
 
-### Module User
+### User Module
 
-Whereas the **User** module uses domain events. For example, when a user registers, a **UserRegisteredEvent** is triggered to update the gender count. After this event is processed, a **UserEmailSentEvent** is dispatched to confirm the user's registration via email.
+Whereas the **User** module utilizes domain events. For example, when a user registers, a **UserRegisteredEvent** is triggered to update the gender count. After this event is processed, a **UserEmailSentEvent** is dispatched to confirm the user's registration via email.
 
-#### What Happens When a User is Registered?
+#### What happens when a user registers?
 
 1. The user is created in the application.
 2. A domain event (**UserRegisteredEvent**) is triggered to update the gender count.
 3. The event is sent to RabbitMQ via Symfony Messenger.
-4. A specific **handler** (**UserRegisteredEventHandler**) processes the event and updates a counter (using a file, database, etc.).
+4. A **specific handler** (**UserRegisteredEventHandler**) processes the event and updates a counter (via a file, database, etc.).
 5. After processing **UserRegisteredEvent**, a new event **UserEmailSentEvent** is triggered to notify the user via email.
-6. The **UserEmailSentEvent** is sent to RabbitMQ and processed by the respective handler.
-7. Make sure the consumer is running to process the events:
+6. **UserEmailSentEvent** is sent to RabbitMQ and processed by its corresponding handler.
+7. Ensure the consumer is running to process the events:
 
    ```bash
    php bin/console messenger:consume async user_registered user_email_sent -vv
    ```
 
-   _(If all events are routed to the same transport, the worker will consume them and execute the corresponding **handlers**.)_
+   _(If all events are routed to the same transport, the worker will consume and execute the **handlers** accordingly.)_
 
 ---
 
@@ -59,13 +59,13 @@ git clone https://github.com/Luispfa/sf7-rabbitmq-ha.git
 cd rabbit-mq
 ```
 
-### 2️⃣ Start the Services with Docker
+### 2️⃣ Start Services with Docker
 
 ```bash
 docker-compose up -d --build
 ```
 
-### 3️⃣ Enter the PHP container:
+### 3️⃣ Access the PHP Container:
 
 ```bash
 docker exec -it sf7_php_ha bash
@@ -77,13 +77,14 @@ docker exec -it sf7_php_ha bash
 php composer install
 ```
 
-### 5️⃣ Check if RabbitMQ's port 15672 is open on host sf7_rabbitmq_ha:
+### 5️⃣ Check if RabbitMQ and Redis Ports are Open:
 
 ```bash
 nc -zv sf7_rabbitmq_ha 15672
+nc -zv sf7_redis_ha 6379
 ```
 
-### 6️⃣ Make an HTTP request to the RabbitMQ API for detailed status information:
+### 6️⃣ Make an HTTP Request to the RabbitMQ API to Get Detailed Status Information:
 
 ```bash
 curl -u guest:guest http://sf7_rabbitmq_ha:15672/api/overview
@@ -95,13 +96,13 @@ curl -u guest:guest http://sf7_rabbitmq_ha:15672/api/overview
 php bin/console messenger:consume async user_registered user_email_sent -vv
 ```
 
-### 8️⃣ Run the RabbitMQ Consumer in daemon mode:
+### 8️⃣ Run the RabbitMQ Consumer in Daemon Mode:
 
 ```bash
 php bin/console messenger:consume async user_registered user_email_sent --daemon
 ```
 
-### 9️⃣ If you are using Windows, add the following line to your C:\Windows\System32\drivers\etc\hosts file:
+### 9️⃣ If You Are on Windows, Add the Following Line to Your C:\Windows\System32\drivers\etc\hosts File:
 
 ```
 127.0.0.1 dev.rabbit-mq.com
@@ -111,13 +112,9 @@ php bin/console messenger:consume async user_registered user_email_sent --daemon
 
 ## Changes in messenger.yml
 
-The `messenger.yml` configuration file has been updated to define dedicated queues for **UserRegisteredEvent** and **UserEmailSentEvent**. The changes ensure that:
+The `messenger.yml` configuration file has been updated to define dedicated queues for **UserRegisteredEvent** and **UserEmailSentEvent**.
 
-1. **UserRegisteredEvent** is routed to `user_registered_queue`.
-2. **UserEmailSentEvent** is routed to `user_email_sent_queue`, but also includes a **dead-letter exchange mechanism** to ensure messages are retried if they fail.
-3. A **direct exchange type** is used to facilitate event-based communication.
-
-Updated `messenger.yml` configuration:
+Updated configuration in `messenger.yml`:
 
 ```yaml
 framework:
@@ -143,13 +140,10 @@ framework:
         dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
         options:
           exchange:
-            name: user_events
+            name: email_events
             type: direct
           queues:
-            user_email_sent_queue:
-              arguments:
-                x-dead-letter-exchange: user_events
-                x-dead-letter-routing-key: user_registered_queue
+            user_email_sent_queue: ~
 
     routing:
       'App\Message\Domain\Message\Message': async
@@ -159,14 +153,14 @@ framework:
 
 ---
 
-## Send a Test Message
+## Sending a Test Message
 
 ### Sending a Message to the async Queue
 
 - **Method:** POST
 - **URL:** `http://dev.rabbit-mq.com/send-message`
 - **Headers:** `Content-Type: application/json`
-- **Body (raw JSON):**
+- **Body (JSON):**
 
 ```json
 {
@@ -179,7 +173,7 @@ framework:
 - **Method:** POST
 - **URL:** `http://dev.rabbit-mq.com/register-user`
 - **Headers:** `Content-Type: application/json`
-- **Body (raw JSON):**
+- **Body (JSON):**
 
 ```json
 {
@@ -192,10 +186,11 @@ framework:
 
 ---
 
-## 🐇 Access to RabbitMQ
+## 🐇 Accessing RabbitMQ and Redis
 
 - RabbitMQ is accessible at `http://dev.rabbit-mq.com:15672/` with username **guest** and password **guest**.
-- If you are using Windows, add the following line to your C:\Windows\System32\drivers\etc\hosts file:
+- Redis can be accessed at `http://dev.rabbit-mq.com:8081/`.
+- If you are on Windows, add the following line to your C:\Windows\System32\drivers\etc\hosts file:
 
 ```
 127.0.0.1 dev.rabbit-mq.com
@@ -207,9 +202,9 @@ framework:
 
 ## Español
 
-# Proyecto Symfony con RabbitMQ en Arquitectura Hexagonal
+# Proyecto Symfony con RabbitMQ y Redis en Arquitectura Hexagonal
 
-Este proyecto implementa un **sistema de mensajería** con **RabbitMQ** en un entorno **Symfony**, siguiendo la **Arquitectura Hexagonal** y utilizando **eventos de dominio** para **desacoplar** la **lógica de negocio** de la **infraestructura**. Los eventos de dominio se activan en el núcleo de la aplicación cuando ocurren cambios significativos y son procesados por **manejadores** específicos, permitiendo, por ejemplo, actualizar contadores u otros procesos de manera **asíncrona**.
+Este proyecto implementa un **sistema de mensajería** con **RabbitMQ** y **Redis** en un entorno **Symfony**, siguiendo la **Arquitectura Hexagonal** y utilizando **eventos de dominio** para **desacoplar** la **lógica de negocio** de la **infraestructura**. Los eventos de dominio se activan en el núcleo de la aplicación cuando ocurren cambios significativos y son procesados por **manejadores** específicos, permitiendo, por ejemplo, actualizar contadores u otros procesos de manera **asíncrona**.
 
 ### Módulo Mensaje
 
@@ -264,10 +259,11 @@ docker exec -it sf7_php_ha bash
 php composer install
 ```
 
-### 5️⃣ Verificar si el puerto 15672 de RabbitMQ está abierto en el host sf7_rabbitmq_ha:
+### 5️⃣ Verificar si los puertos de RabbitMQ y Redis están abiertos:
 
 ```bash
 nc -zv sf7_rabbitmq_ha 15672
+nc -zv sf7_redis_ha 6379
 ```
 
 ### 6️⃣ Realizar una Petición HTTP a la API de RabbitMQ para obtener información detallada del estado:
@@ -298,11 +294,7 @@ php bin/console messenger:consume async user_registered user_email_sent --daemon
 
 ## Cambios en messenger.yml
 
-El archivo de configuración `messenger.yml` ha sido actualizado para definir colas dedicadas para **UserRegisteredEvent** y **UserEmailSentEvent**. Estos cambios garantizan que:
-
-1. **UserRegisteredEvent** se enruta a `user_registered_queue`.
-2. **UserEmailSentEvent** se enruta a `user_email_sent_queue`, pero también incluye un **mecanismo de intercambio de mensajes en caso de error (dead-letter exchange)** para asegurar reintentos en caso de fallos.
-3. Se usa un **intercambio de tipo directo** para facilitar la comunicación basada en eventos.
+El archivo de configuración `messenger.yml` ha sido actualizado para definir colas dedicadas para **UserRegisteredEvent** y **UserEmailSentEvent**.
 
 Configuración actualizada en `messenger.yml`:
 
@@ -330,13 +322,10 @@ framework:
         dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
         options:
           exchange:
-            name: user_events
+            name: email_events
             type: direct
           queues:
-            user_email_sent_queue:
-              arguments:
-                x-dead-letter-exchange: user_events
-                x-dead-letter-routing-key: user_registered_queue
+            user_email_sent_queue: ~
 
     routing:
       'App\Message\Domain\Message\Message': async
@@ -379,9 +368,10 @@ framework:
 
 ---
 
-## 🐇 Acceso a RabbitMQ
+## 🐇 Acceso a RabbitMQ y Redis
 
 - RabbitMQ es accesible en `http://dev.rabbit-mq.com:15672/` con usuario **guest** y contraseña **guest**.
+- Redis puede ser accedido en `http://dev.rabbit-mq.com:8081/`.
 - Si estás en Windows, agrega la siguiente línea a tu archivo C:\Windows\System32\drivers\etc\hosts:
 
 ```
