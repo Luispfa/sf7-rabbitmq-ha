@@ -7,6 +7,7 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "predis/predis": "^2.3",
         "ramsey/uuid": "^4.7",
         "symfony/amqp-messenger": "7.2.*",
         "symfony/console": "7.2.*",

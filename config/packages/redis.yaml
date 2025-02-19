@@ -1,0 +1,4 @@
+services:
+  Snc\RedisBundle\Client\Predis\Client:
+    arguments:
+      - "%env(REDIS_URL)%"

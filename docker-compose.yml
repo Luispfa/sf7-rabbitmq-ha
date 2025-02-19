@@ -10,6 +10,9 @@ services:
             - .:/var/www/rabbit-mq/
         networks:
             - symfony_network
+        depends_on:
+            - rabbitmq
+            - redis
     nginx:
         build:
             context: .
@@ -21,6 +24,8 @@ services:
             - 80:80
         networks:
             - symfony_network
+        depends_on:
+            - php
     
     rabbitmq:
         image: rabbitmq:latest
@@ -35,6 +40,15 @@ services:
         volumes:
             - rabbitmq_data:/var/lib/rabbitmq
             - ./docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+        networks:
+            - symfony_network
+
+    redis:
+        image: redis:latest
+        container_name: sf7_redis_ha
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
         networks:
             - symfony_network
 
