@@ -11,22 +11,15 @@ use Predis\Client;
 class RedisUserRepository implements UserRepository
 {
     private const REDIS_KEY = 'users';
-    private const GENDER_COUNT_KEY = 'gender_count';
 
-    public function __construct(private Client $redis) {}
+    public function __construct(private readonly Client $redis) {}
 
     public function save(User $user): void
     {
         $users = $this->getAllUsers();
-        $users[] = [
-            'id' => $user->getUuid(),
-            'name' => $user->getName(),
-            'lastname' => $user->getLastName(),
-            'gender' => $user->getGender(),
-            'email' => $user->getEmail(),
-        ];
+        $users[] = $user->toArray();
 
-        $this->redis->set(self::REDIS_KEY, json_encode($users));
+        $this->redis->set(self::REDIS_KEY, json_encode($users, JSON_PRETTY_PRINT));
     }
 
     public function getAllUsers(): array
@@ -37,12 +30,19 @@ class RedisUserRepository implements UserRepository
 
     public function getGenderCount(): array
     {
-        $data = $this->redis->get(self::GENDER_COUNT_KEY);
-        return $data ? json_decode($data, true) : [];
+        $users = $this->getAllUsers();
+        $genderCount = [];
+
+        foreach ($users as $user) {
+            $gender = $user['gender'];
+            $genderCount[$gender] = ($genderCount[$gender] ?? 0) + 1;
+        }
+
+        return $genderCount;
     }
 
     public function saveGenderCount(array $genderCount): void
     {
-        $this->redis->set(self::GENDER_COUNT_KEY, json_encode($genderCount));
+        // No necesitamos guardar el conteo ya que lo calculamos en tiempo real
     }
 }
