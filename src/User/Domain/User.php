@@ -6,18 +6,23 @@ namespace App\User\Domain;
 
 use App\User\Domain\Event\UserRegisteredEvent;
 use App\User\Domain\Event\UserEmailSentEvent;
+use App\User\Domain\ValueObject\Email;
+use App\User\Domain\ValueObject\Gender;
+use App\User\Domain\ValueObject\LastName;
+use App\User\Domain\ValueObject\Name;
+use App\User\Domain\ValueObject\Uuid;
 use Ramsey\Uuid\Uuid as RamseyUuid;
 
 class User
 {
     private array $domainEvents = [];
 
-    private function __construct(
-        private string $uuid,
-        private string $name,
-        private string $lastname,
-        private string $gender,
-        private string $email,
+    public function __construct(
+        private readonly Name $name,
+        private readonly LastName $lastName,
+        private readonly Gender $gender,
+        private readonly Email $email,
+        private readonly Uuid $uuid
     ) {}
 
     public static function create(
@@ -26,50 +31,59 @@ class User
         string $gender,
         string $email,
     ): static {
-        $uuid = RamseyUuid::uuid4()->toString();
-        $user = new static($uuid, $name, $lastname, $gender, $email);
+        $user = new static(
+            name: Name::create($name),
+            lastName: LastName::create($lastname),
+            gender: Gender::create($gender),
+            email: Email::create($email),
+            uuid: Uuid::create(RamseyUuid::uuid4()->toString())
+        );
 
         // Accumulate event instead of dispatching it here
         $user->recordDomainEvent(UserRegisteredEvent::fromUser($user));
         $user->recordDomainEvent(UserEmailSentEvent::fromUser($user));
 
-
         return $user;
     }
 
-    public function getUuid(): string
+    public function uuid(): Uuid
     {
         return $this->uuid;
     }
 
-    public function getName(): string
+    public function email(): Email
+    {
+        return $this->email;
+    }
+
+    public function name(): Name
     {
         return $this->name;
     }
 
-    public function getLastname(): string
+    public function lastName(): LastName
     {
-        return $this->lastname;
+        return $this->lastName;
     }
 
-    public function getGender(): string
+    public function gender(): Gender
     {
         return $this->gender;
     }
 
-    public function getEmail(): string
+    public function fullName(): string
     {
-        return $this->email;
+        return sprintf('%s %s', $this->name->value(), $this->lastName->value());
     }
 
     public function toArray(): array
     {
         return [
-            'uuid' => $this->uuid,
-            'name' => $this->name,
-            'lastname' => $this->lastname,
-            'gender' => $this->gender,
-            'email' => $this->email,
+            'uuid' => $this->uuid->value(),
+            'name' => $this->name->value(),
+            'lastname' => $this->lastName->value(),
+            'gender' => $this->gender->value(),
+            'email' => $this->email->value(),
         ];
     }
 

@@ -12,7 +12,7 @@ final class LastName
     private const MAX_LENGTH = 50;
     private string $value;
 
-    public function __construct(string $lastName)
+    private function __construct(string $lastName)
     {
         if (strlen($lastName) < self::MIN_LENGTH || strlen($lastName) > self::MAX_LENGTH) {
             throw new InvalidLastNameException();
@@ -23,6 +23,11 @@ final class LastName
         }
 
         $this->value = $lastName;
+    }
+
+    public static function create(string $lastName): self
+    {
+        return new self($lastName);
     }
 
     public function value(): string

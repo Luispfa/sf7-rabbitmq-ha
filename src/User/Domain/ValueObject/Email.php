@@ -10,13 +10,18 @@ final class Email
 {
     private string $value;
 
-    public function __construct(string $email)
+    private function __construct(string $email)
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidEmailException();
+            throw new \InvalidArgumentException('Invalid email format');
         }
 
         $this->value = $email;
+    }
+
+    public static function create(string $email): self
+    {
+        return new self($email);
     }
 
     public function value(): string

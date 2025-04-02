@@ -11,13 +11,18 @@ final class Gender
 {
     private GenderType $value;
 
-    public function __construct(string $gender)
+    private function __construct(string $gender)
     {
         try {
             $this->value = GenderType::from($gender);
         } catch (\ValueError) {
             throw new InvalidGenderException();
         }
+    }
+
+    public static function create(string $gender): self
+    {
+        return new self($gender);
     }
 
     public function value(): string
