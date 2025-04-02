@@ -13,7 +13,7 @@ class UserEmailSentEventHandler
     public function __invoke(UserEmailSentEvent $event): void
     {
         // Simulamos el envío de correo
-        echo sprintf("📧 Enviando email a: %s\n", $event->getEmail());
+        echo sprintf("📧 Enviando email a: %s\n", $event->getEmail()->value());
 
         // Aquí puedes integrar un servicio real (Mailer, AWS SES, etc.)
     }

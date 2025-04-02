@@ -15,20 +15,22 @@ class UserRegisteredEventHandler
 
     public function __invoke(UserRegisteredEvent $event): void
     {
-        echo "✅ Processing UserRegisteredEvent for user {$event->getUserId()}...\n";
+        echo "✅ Processing UserRegisteredEvent for user {$event->getUserId()->value()}...\n";
         // Simulating an error
         // throw new \Exception("❌ Simulated error: Failed to process UserRegisteredEvent.");
 
         $genderCount = $this->userRepository->getGenderCount();
+        $genderValue = $event->getGender()->value();
+
         // If the gender does not exist, initialize it to 0
-        if (!isset($genderCount[$event->getGender()])) {
-            $genderCount[$event->getGender()] = 0;
+        if (!isset($genderCount[$genderValue])) {
+            $genderCount[$genderValue] = 0;
         }
 
         // Increment the counter for the corresponding gender
-        $genderCount[$event->getGender()]++;
+        $genderCount[$genderValue]++;
         $this->userRepository->saveGenderCount($genderCount);
 
-        echo "✅ Successfully processed UserRegisteredEvent for user {$event->getUserId()}.\n";
+        echo "✅ Successfully processed UserRegisteredEvent for user {$event->getUserId()->value()}.\n";
     }
 }

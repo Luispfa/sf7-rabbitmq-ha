@@ -10,9 +10,11 @@ use Predis\Client;
 
 class RedisUserRepository implements UserRepository
 {
-    private const REDIS_KEY = 'users';
+    private const string REDIS_KEY = 'users';
 
-    public function __construct(private readonly Client $redis) {}
+    public function __construct(
+        private readonly Client $redis
+    ) {}
 
     public function save(User $user): void
     {
