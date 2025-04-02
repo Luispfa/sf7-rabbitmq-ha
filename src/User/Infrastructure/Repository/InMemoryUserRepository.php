@@ -45,9 +45,4 @@ class InMemoryUserRepository implements UserRepository
 
         return $genderCount;
     }
-
-    public function saveGenderCount(array $genderCount): void
-    {
-        // No necesitamos guardar el conteo ya que lo calculamos en tiempo real
-    }
 }

@@ -11,6 +11,4 @@ interface UserRepository
     public function getAllUsers(): array;
 
     public function getGenderCount(): array;
-
-    public function saveGenderCount(array $genderCount): void;
 }
