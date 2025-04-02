@@ -1,5 +1,11 @@
 # Bilingual README / README Bilingüe
 
+[![Symfony](https://img.shields.io/badge/Symfony-7.0-000000?style=flat-square&logo=symfony)](https://symfony.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php)](https://www.php.net)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Latest-FF6600?style=flat-square&logo=rabbitmq)](https://www.rabbitmq.com)
+[![Redis](https://img.shields.io/badge/Redis-Latest-DC382D?style=flat-square&logo=redis)](https://redis.io)
+[![Docker](https://img.shields.io/badge/Docker-Required-2496ED?style=flat-square&logo=docker)](https://www.docker.com)
+
 **This repository is bilingual. Below you will find the English version followed by the Spanish version.  
 Este repositorio es bilingüe. A continuación encontrarás la versión en inglés seguida de la versión en español.**
 
@@ -17,6 +23,51 @@ Este repositorio es bilingüe. A continuación encontrarás la versión en ingl�
   </div>
 </div>
 <p></p>
+
+## 📑 Table of Contents / Índice
+
+- [Requirements / Requisitos](#-requirements--requisitos)
+- [Installation / Instalación](#-installation--instalación)
+- [Configuration / Configuración](#-configuration--configuración)
+- [Usage / Uso](#-usage--uso)
+- [Architecture / Arquitectura](#-architecture--arquitectura)
+- [Troubleshooting / Solución de Problemas](#-troubleshooting--solución-de-problemas)
+- [Contributing / Contribuir](#-contributing--contribuir)
+- [Security / Seguridad](#-security--seguridad)
+
+## 🔧 Requirements / Requisitos
+
+### System Requirements / Requisitos del Sistema
+
+- Docker >= 20.10
+- Docker Compose >= 2.0
+- Git >= 2.30
+
+### Development Requirements / Requisitos de Desarrollo
+
+- PHP >= 8.3
+- Composer >= 2.0
+- Symfony CLI >= 5.0
+
+### Environment Variables / Variables de Entorno
+
+Create a `.env` file in the root directory with the following variables:
+Crea un archivo `.env` en el directorio raíz con las siguientes variables:
+
+```env
+# Application
+APP_ENV=dev
+APP_DEBUG=1
+APP_SECRET=your_secret_here
+
+# RabbitMQ
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+MESSENGER_TRANSPORT_DSN=amqp://guest:guest@rabbitmq:5672/%2f/messages
+
+# Redis
+REDIS_URL=redis://redis:6379
+```
 
 ## English
 
@@ -198,7 +249,93 @@ framework:
 
 ---
 
----
+## 🏗️ Architecture / Arquitectura
+
+### Hexagonal Architecture Overview / Visión General de la Arquitectura Hexagonal
+
+```
+src/
+├── Message/                 # Message Module / Módulo de Mensajes
+│   ├── Application/        # Application Services / Servicios de Aplicación
+│   ├── Domain/            # Domain Logic / Lógica de Dominio
+│   └── Infrastructure/    # Infrastructure Implementation / Implementación de Infraestructura
+└── User/                   # User Module / Módulo de Usuarios
+    ├── Application/       # Application Services / Servicios de Aplicación
+    ├── Domain/           # Domain Logic / Lógica de Dominio
+    └── Infrastructure/   # Infrastructure Implementation / Implementación de Infraestructura
+```
+
+### Event Flow / Flujo de Eventos
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Domain
+    participant RabbitMQ
+    participant Handler
+
+    Client->>Controller: POST /register-user
+    Controller->>Domain: Create User
+    Domain->>Domain: Trigger UserRegisteredEvent
+    Domain->>RabbitMQ: Send Event
+    RabbitMQ->>Handler: Process Event
+    Handler->>Domain: Update Counters
+    Domain->>Domain: Trigger UserEmailSentEvent
+    Domain->>RabbitMQ: Send Event
+    RabbitMQ->>Handler: Process Event
+    Handler->>Client: Send Email
+```
+
+## 🔍 Troubleshooting / Solución de Problemas
+
+### Common Issues / Problemas Comunes
+
+1. **RabbitMQ Connection Issues / Problemas de Conexión con RabbitMQ**
+
+   - Check if RabbitMQ is running: `docker ps | grep rabbitmq`
+   - Verify ports are open: `nc -zv sf7_rabbitmq_ha 5672`
+   - Check RabbitMQ logs: `docker logs sf7_rabbitmq_ha`
+
+2. **Redis Connection Issues / Problemas de Conexión con Redis**
+
+   - Check if Redis is running: `docker ps | grep redis`
+   - Verify Redis connection: `redis-cli -h sf7_redis_ha ping`
+   - Check Redis logs: `docker logs sf7_redis_ha`
+
+3. **Consumer Issues / Problemas con el Consumidor**
+   - Ensure consumer is running: `ps aux | grep messenger:consume`
+   - Check consumer logs: `docker logs sf7_php_ha`
+   - Restart consumer if needed: `php bin/console messenger:consume async user_registered user_email_sent -vv`
+
+## 🤝 Contributing / Contribuir
+
+1. Fork the repository / Haz un fork del repositorio
+2. Create your feature branch / Crea tu rama de características
+3. Commit your changes / Haz commit de tus cambios
+4. Push to the branch / Haz push a la rama
+5. Create a new Pull Request / Crea un nuevo Pull Request
+
+## 🔒 Security / Seguridad
+
+### Best Practices / Mejores Prácticas
+
+1. **Environment Variables / Variables de Entorno**
+
+   - Never commit `.env` files / Nunca commits archivos `.env`
+   - Use different secrets for development and production / Usa diferentes secretos para desarrollo y producción
+   - Rotate secrets regularly / Rota los secretos regularmente
+
+2. **API Security / Seguridad de la API**
+
+   - Use HTTPS in production / Usa HTTPS en producción
+   - Implement rate limiting / Implementa límites de tasa
+   - Validate all input / Valida todas las entradas
+
+3. **Message Queue Security / Seguridad de Cola de Mensajes**
+   - Use strong passwords / Usa contraseñas fuertes
+   - Enable SSL/TLS / Habilita SSL/TLS
+   - Monitor queue access / Monitorea el acceso a las colas
 
 ## Español
 
@@ -247,7 +384,7 @@ cd rabbit-mq
 docker-compose up -d --build
 ```
 
-### 3️⃣ Ingresar al Contenedor PHP:
+### 3️⃣ Acceder al Contenedor PHP:
 
 ```bash
 docker exec -it sf7_php_ha bash
@@ -259,14 +396,14 @@ docker exec -it sf7_php_ha bash
 php composer install
 ```
 
-### 5️⃣ Verificar si los puertos de RabbitMQ y Redis están abiertos:
+### 5️⃣ Verificar si los Puertos de RabbitMQ y Redis están Abiertos:
 
 ```bash
 nc -zv sf7_rabbitmq_ha 15672
 nc -zv sf7_redis_ha 6379
 ```
 
-### 6️⃣ Realizar una Petición HTTP a la API de RabbitMQ para obtener información detallada del estado:
+### 6️⃣ Realizar una Petición HTTP a la API de RabbitMQ para Obtener Información Detallada del Estado:
 
 ```bash
 curl -u guest:guest http://sf7_rabbitmq_ha:15672/api/overview
@@ -284,7 +421,7 @@ php bin/console messenger:consume async user_registered user_email_sent -vv
 php bin/console messenger:consume async user_registered user_email_sent --daemon
 ```
 
-### 9️⃣ Si estás en Windows, agrega la siguiente línea a tu archivo C:\Windows\System32\drivers\etc\hosts:
+### 9️⃣ Si Estás en Windows, Agrega la Siguiente Línea a tu Archivo C:\Windows\System32\drivers\etc\hosts:
 
 ```
 127.0.0.1 dev.rabbit-mq.com
@@ -377,3 +514,93 @@ framework:
 ```
 127.0.0.1 dev.rabbit-mq.com
 ```
+
+---
+
+## 🏗️ Arquitectura
+
+### Visión General de la Arquitectura Hexagonal
+
+```
+src/
+├── Message/                 # Módulo de Mensajes
+│   ├── Application/        # Servicios de Aplicación
+│   ├── Domain/            # Lógica de Dominio
+│   └── Infrastructure/    # Implementación de Infraestructura
+└── User/                   # Módulo de Usuarios
+    ├── Application/       # Servicios de Aplicación
+    ├── Domain/           # Lógica de Dominio
+    └── Infrastructure/   # Implementación de Infraestructura
+```
+
+### Flujo de Eventos
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Domain
+    participant RabbitMQ
+    participant Handler
+
+    Client->>Controller: POST /register-user
+    Controller->>Domain: Create User
+    Domain->>Domain: Trigger UserRegisteredEvent
+    Domain->>RabbitMQ: Send Event
+    RabbitMQ->>Handler: Process Event
+    Handler->>Domain: Update Counters
+    Domain->>Domain: Trigger UserEmailSentEvent
+    Domain->>RabbitMQ: Send Event
+    RabbitMQ->>Handler: Process Event
+    Handler->>Client: Send Email
+```
+
+## 🔍 Solución de Problemas
+
+### Problemas Comunes
+
+1. **Problemas de Conexión con RabbitMQ**
+
+   - Verificar si RabbitMQ está ejecutándose: `docker ps | grep rabbitmq`
+   - Verificar si los puertos están abiertos: `nc -zv sf7_rabbitmq_ha 5672`
+   - Revisar los logs de RabbitMQ: `docker logs sf7_rabbitmq_ha`
+
+2. **Problemas de Conexión con Redis**
+
+   - Verificar si Redis está ejecutándose: `docker ps | grep redis`
+   - Verificar la conexión con Redis: `redis-cli -h sf7_redis_ha ping`
+   - Revisar los logs de Redis: `docker logs sf7_redis_ha`
+
+3. **Problemas con el Consumidor**
+   - Asegurar que el consumidor está ejecutándose: `ps aux | grep messenger:consume`
+   - Revisar los logs del consumidor: `docker logs sf7_php_ha`
+   - Reiniciar el consumidor si es necesario: `php bin/console messenger:consume async user_registered user_email_sent -vv`
+
+## 🤝 Contribuir
+
+1. Haz un fork del repositorio
+2. Crea tu rama de características
+3. Haz commit de tus cambios
+4. Haz push a la rama
+5. Crea un nuevo Pull Request
+
+## 🔒 Seguridad
+
+### Mejores Prácticas
+
+1. **Variables de Entorno**
+
+   - Nunca commits archivos `.env`
+   - Usa diferentes secretos para desarrollo y producción
+   - Rota los secretos regularmente
+
+2. **Seguridad de la API**
+
+   - Usa HTTPS en producción
+   - Implementa límites de tasa
+   - Valida todas las entradas
+
+3. **Seguridad de Cola de Mensajes**
+   - Usa contraseñas fuertes
+   - Habilita SSL/TLS
+   - Monitorea el acceso a las colas
